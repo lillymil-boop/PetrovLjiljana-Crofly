@@ -5,10 +5,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="styles.css">
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body>
 
-    <!-- HERO HEADER -->
     <header class="hero-header">
         <nav class="container">
             <div class="nav-box">
@@ -83,16 +84,13 @@
         </div>
     </header>
 
-    <!-- GLAVNI SADRŽAJ -->
     <main class="container map-section">
         <div class="lp-container">
-            <p class="t-center">Upotrijebite filtre ispod kako biste pronašli smještajne objekte na mapi.</p>
+            <p class="t-center">Upotrijebite filtre ispod kako biste pronašli privatni smještaj na mapi.</p>
 
             <div class="filters-container m-top-40">
                 <select id="vrsta-smjestaja" class="filter-select">
-                    <option value="lodging">Sve vrste smještaja</option>
-                    <option value="hotel">Hoteli</option>
-                    <option value="campground">Kampovi</option>
+                    <option value="airbnb">Privatni smještaj (Airbnb / BnB)</option>
                 </select>
 
                 <select id="grad-select" class="filter-select">
@@ -109,12 +107,10 @@
                 <button class="c-btn" onclick="filtrirajKartu()">Traži smještaj </button>
             </div>
 
-            <!-- Kontejner za Google kartu -->
             <div id="map"></div>
         </div>
     </main>
 
-    <!-- FOOTER -->
     <footer class="footer-main-container">
         <div class="container t-center">
             <div class="footer-links-grid">
@@ -129,8 +125,7 @@
         </div>
     </footer>
 
-    <!-- SKRIPTE -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="main.js"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=API_KLJUČ_ĆEMO_TU_STAVITI&libraries=places&callback=initMap" async defer></script>
 </body>
 </html>

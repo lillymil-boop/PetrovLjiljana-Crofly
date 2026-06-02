@@ -1,12 +1,13 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
 import requests
+import os
 
 app = Flask(__name__)
-CORS(app)  # Otvara vrata tvom JavaScriptu
+CORS(app)  # Otvara vrata JavaScriptu
 
 # API ključ za Google Maps Directions API
-GOOGLE_KEY = "AIzaSyAs-n8ho4ea_b-UzQUTztQT0CMxYBYBBJc"
+GOOGLE_KEY = os.environ.get('GOOGLE_MAPS_KEY', 'AIzaSyAs-n8ho4ea_b-UzQUTztQT0CMxYBYBBJc')
 
 def dohvati_javni_prijevoz(grad):
     lokacije = {
@@ -69,5 +70,8 @@ def get_prijevoz(grad):
     return jsonify(rezultat)
 
 if __name__ == "__main__":
-    print("API Prijevoz je pokrenut na http://localhost:5000")
-    app.run(debug=True)
+    import os
+
+    port = int(os.environ.get("PORT", 5000))
+    print(f"API Prijevoz je pokrenut na javnom portu: {port}")
+    app.run(host="0.0.0.0", port=port, debug=False)

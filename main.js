@@ -1,4 +1,3 @@
-// Čekamo da se cijeli DOM učita prije izvršavanja bilo kakve logike
 document.addEventListener('DOMContentLoaded', () => {
     
     /* ==========================================================================
@@ -7,7 +6,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const themeToggle = document.getElementById('theme-toggle');
     const htmlElement = document.documentElement;
 
-    // Provjera postoji li spremljena tema u localStorageu
     const currentTheme = localStorage.getItem('theme');
 
     if (currentTheme) {
@@ -15,7 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
         updateToggleButton(currentTheme);
     }
 
-    // listener za promjenu teme
     if (themeToggle) {
         themeToggle.addEventListener('click', () => {
             let theme = htmlElement.getAttribute('data-theme');
@@ -30,14 +27,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 updateToggleButton('dark');
             }
 
-            // Osvježi Google kartu 
             if (typeof initMap === "function") {
                 initMap(); 
             }
         });
     }
 
-    
     function updateToggleButton(theme) {
         if (!themeToggle) return;
         themeToggle.innerHTML = (theme === 'dark') ? '☀️' : '🌙';
@@ -57,7 +52,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const confirmPassword = document.getElementById('confirmPassword').value;
             const errorText = document.getElementById('errorText');
 
-            // Provjera podudaranja lozinki
             if (password !== confirmPassword) {
                 errorText.style.display = 'block';
                 errorText.scrollIntoView({ behavior: 'smooth' });
@@ -66,7 +60,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 errorText.style.display = 'none';
             }
 
-            // Kreiranje objekta korisnika
             const korisnik = {
                 ime: document.getElementById('firstName').value,
                 prezime: document.getElementById('lastName').value,
@@ -74,13 +67,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 lozinka: password
             };
 
-            // Pohrana imena za personalizaciju
             localStorage.setItem('korisnikIme', korisnik.ime);
 
             console.log("Podaci spremni za registraciju:", korisnik);
             alert("Uspješna registracija za: " + korisnik.ime + " " + korisnik.prezime);
             
-            // Resetiranje forme
             this.reset();
         });
     }
@@ -97,8 +88,7 @@ async function dohvatiPrognozu(grad, elementId) {
     prikaz.innerHTML = `<p>Učitavanje prognoze za ${grad}...</p>`;
 
     try {
-        // Novo: dohvaćamo pravi API umjesto samo simulacije
-        const response = await fetch(`http://127.0.0.1:5000/api/prognoza/${grad.toLowerCase()}`);
+        const response = await fetch(`https://crofly.onrender.com/api/prognoza/${grad.toLowerCase()}`);
         if (!response.ok) throw new Error('API response not OK');
 
         const data = await response.json();
@@ -113,29 +103,28 @@ async function dohvatiPrognozu(grad, elementId) {
 }
 
 /* ==========================================================================
-   4. KLASA ZA UPRAVLJANJE KARTOM 
+   4. KLASA ZA UPRAVLJANJE KARTOM (Uživo povezano na vanjski Airbnb API)
    ========================================================================== */
 class CroFlyMap {
     constructor() {
         this.map = null;
-        this.service = null;
-        this.infowindow = null;
-        this.markers = []; // Lista za praćenje markera kako bi ih mogli obrisati
-        this.croatiaCenter = { lat: 44.4748, lng: 15.1960 };
+        this.markers = [];
+        this.croatiaCenter = [44.4748, 15.1960];
     }
 
-    // Inicijalizacija karte
     init() {
-        this.infowindow = new google.maps.InfoWindow();
-        this.map = new google.maps.Map(document.getElementById("map"), {
-            zoom: 7,
-            center: this.croatiaCenter
-        });
+        if (document.getElementById("map")) {
+            // Pokrećemo OpenStreetMap unutar 'map' kontejnera preko Leaflet knjižnice
+            this.map = L.map('map').setView(this.croatiaCenter, 7);
 
-        this.provjeriUrlParametre();
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(this.map);
+
+            this.provjeriUrlParametre();
+        }
     }
 
-    // Provjera dolazi li korisnik s klikom na određeni grad
     provjeriUrlParametre() {
         const urlParams = new URLSearchParams(window.location.search);
         const gradParam = urlParams.get('grad');
@@ -149,84 +138,84 @@ class CroFlyMap {
         }
     }
 
-    // Glavna metoda za pretragu i filtriranje
-    filtriraj() {
+    async filtriraj() {
         const grad = document.getElementById('grad-select').value;
-        const vrsta = document.getElementById('vrsta-smjestaja').value;
+        const vrsta = document.getElementById('vrsta-smjestaja').value; // Pročitat će "airbnb"
 
         if (!grad) {
             alert("Molimo odaberite grad.");
             return;
         }
 
-        this.obrisiMarkere(); // čisti stare markere prije nove pretrage
+        this.obrisiMarkere();
 
-        const request = {
-            query: `${vrsta} in ${grad}, Croatia`,
-            fields: ['name', 'geometry', 'formatted_address'],
-        };
+        try {
+            // Šaljemo dohvat (fetch) na tvoju novu objektnu rutu u Flasku
+            const response = await fetch(`https://crofly.onrender.com/api/smjestaj/${grad}/${vrsta}`);
+            const data = await response.json();
 
-        this.service = new google.maps.places.PlacesService(this.map);
-
-        this.service.textSearch(request, (results, status) => {
-            if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-                this.map.setCenter(results[0].geometry.location);
-                this.map.setZoom(13);
-
-                results.forEach(place => this.dodajMarker(place));
+            if (!data.objekti || data.objekti.length === 0) {
+                alert("Trenutno nema dostupnog smještaja za odabrani grad.");
+                return;
             }
-        });
+
+            // Centriramo mapu na koordinate grada koje je vratio Airbnb servis s backenda
+            this.map.setView(data.coords, 13);
+
+            // Crtamo markere iz dinamičke liste objekata pristigle s API-ja
+            data.objekti.forEach(place => {
+                const marker = L.marker(place.coords).addTo(this.map);
+                
+                // Popup prozorčić koristi ugrađene inline stilove za osnovni tekst, bez diranja styles.css datoteke
+                marker.bindPopup(`
+                    <div style="font-family: 'Poppins', sans-serif; min-width: 160px; padding: 5px;">
+                        <strong style="color: #003580; font-size: 1.1em; display: block; margin-bottom: 3px;">${place.name}</strong>
+                        <span style="color: #666; font-size: 0.9em;">${place.city}</span><br>
+                        <span style="color: #ffb020; font-size: 0.9em;">⭐ ${place.rating}</span>
+                        <div style="margin-top: 8px; font-weight: bold; color: #00a896; font-size: 1.05em; border-top: 1px solid #eee; padding-top: 5px;">
+                            ${place.price} / noć
+                        </div>
+                    </div>
+                `);
+                
+                this.markers.push(marker);
+            });
+
+        } catch (error) {
+            console.error("Greška pri dohvaćanju Airbnb podataka:", error);
+            alert("Neuspješno povezivanje s poslužiteljem za smještaj.");
+        }
     }
 
-    // Kreiranje pojedinačnog markera
-    dodajMarker(place) {
-        if (!place.geometry || !place.geometry.location) return;
-
-        const marker = new google.maps.Marker({
-            map: this.map,
-            position: place.geometry.location,
-            animation: google.maps.Animation.DROP // Lijep efekt padanja markera
-        });
-
-        google.maps.event.addListener(marker, "click", () => {
-            this.infowindow.setContent(`<strong>${place.name}</strong><br>${place.formatted_address || ''}`);
-            this.infowindow.open(this.map, marker);
-        });
-
-        this.markers.push(marker);
-    }
-
-    // Funkcija za čišćenje karte
     obrisiMarkere() {
-        this.markers.forEach(m => m.setMap(null));
+        this.markers.forEach(m => this.map.removeLayer(m));
         this.markers = [];
     }
 }
 
-// Globalna instanca klase
+// Instanciranje klase i globalno pokretanje
 const croFlyMap = new CroFlyMap();
 
-// Globalna funkcija koju poziva Google Maps Callback
-function initMap() {
+window.onload = function() {
     croFlyMap.init();
-}
+};
 
-// Funkcija za gumb na stranici
 function filtrirajKartu() {
     croFlyMap.filtriraj();
-} /* ==========================================================================
-    5. LOGIKA ZA LETOVE
-    ========================================================================== */
+}
+
+/* ==========================================================================
+   5. LOGIKA ZA LETOVE
+   ========================================================================== */
 document.addEventListener('DOMContentLoaded', () => {
     const gradovi = ['zagreb', 'split', 'dubrovnik', 'zadar', 'pula', 'rijeka', 'osijek'];
 
-    // Funkcija za dohvaćanje i prikaz letova za određeni grad
     async function osvjeziLetove(grad) {
         const kontejner = document.getElementById(grad + "-raspored");
         if (!kontejner) return;
 
         try {
-            const response = await fetch(`http://127.0.0.1:5000/api/raspored/${grad}`);
+            const response = await fetch(`https://crofly.onrender.com/api/raspored/${grad}`);
             const data = await response.json();
 
             kontejner.innerHTML = ''; 
@@ -247,12 +236,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 1. AUTOMATSKO UČITAVANJE SVEGA ODJEDNOM
     gradovi.forEach(grad => {
         osvjeziLetove(grad);
     });
 
-    // 2. OSTAVLJAMO I KLIK (ako korisnik želi ručno osvježiti kasnije)
     document.querySelectorAll('ul li a').forEach(link => {
         link.addEventListener('click', function(e) {
             const href = this.getAttribute('href');
@@ -263,26 +250,22 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
+
 /* ==========================================================================
-    6. LOGIKA ZA JAVASCRIPT API PRIJEVOZ (autobus.html)
-    ========================================================================== */
+   6. LOGIKA ZA JAVASCRIPT API PRIJEVOZ (autobus.html)
+   ========================================================================== */
 document.addEventListener('DOMContentLoaded', () => {
-    // Popis svih gradova koji odgovaraju ID-jevima u HTML-u
     const gradovi = ['zagreb', 'split', 'dubrovnik', 'zadar', 'pula', 'rijeka', 'osijek'];
 
     async function dohvatiPrijevoz() {
         for (const grad of gradovi) {
-            // Tražimo div s ID-jem, npr. "zagreb-bus-info"
             const kontejner = document.getElementById(grad + "-bus-info");
             
-            // Ako element postoji na stranici (npr. na autobus.html), pokrećemo API poziv
             if (kontejner) {
                 try {
-                    // Gađamo tvoj lokalni Flask server
-                    const res = await fetch(`http://127.0.0.1:5000/api/prijevoz/${grad}`);
+                    const res = await fetch(`https://crofly.onrender.com/api/prijevoz/${grad}`);
                     const data = await res.json();
                     
-                    // Ispisujemo Google Maps podatke u HTML s malo CSS stila
                     kontejner.innerHTML = `
                         <div style="background: #f8f9fa; padding: 12px; border-left: 5px solid #4285F4; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
                             <p style="margin: 0; font-size: 1.1em; color: #2c3e50;">🚌 <strong>${data.linija}</strong></p>
@@ -290,7 +273,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     `;
                 } catch (err) {
-                    // U slučaju da je server ugašen ili je greška u mreži
                     console.error("Greška kod dohvata za grad " + grad + ":", err);
                     kontejner.innerHTML = `
                         <div style="background: #fff3f3; padding: 10px; border-left: 5px solid #dc3545; border-radius: 4px;">
@@ -302,16 +284,57 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Pokrećemo funkciju
     dohvatiPrijevoz();
 });
+
 document.addEventListener('DOMContentLoaded', () => {
     const gradovi = ['Zagreb', 'Split', 'Dubrovnik', 'Zadar', 'Pula', 'Rijeka', 'Osijek'];
     
     gradovi.forEach(grad => {
         const elementId = grad.toLowerCase() + '-prognoza';
-        
-        // Pozivamo async funkciju za dohvat
         dohvatiPrognozu(grad, elementId);
     });
 });
+
+/* ==========================================================================
+   7. LOGIKA ZA WIKIPEDIA ATRAKCIJE (Izravno unutar sekcije grada)
+   ========================================================================== */
+
+async function dohvatiWikiPodatke(grad) {
+    const response = await fetch(`https://crofly.onrender.com/api/wiki/${grad}`);
+    return await response.json();
+}
+
+async function prikaziZanimljivostiGrada(grad) {
+    const prikaz = document.getElementById(`${grad.toLowerCase()}-wiki`);
+    if (!prikaz) return;
+
+    document.querySelectorAll('.wiki-lokalni-prikaz').forEach(box => box.innerHTML = '');
+
+    prikaz.innerHTML = `<p class="wiki-ucitavanje-tekst">Dohvaćam zanimljivosti s Wikipedije...</p>`;
+
+    try {
+        const data = await dohvatiWikiPodatke(grad);
+
+        if (data.error) {
+            prikaz.innerHTML = `<p class="wiki-greska-tekst">Greška: ${data.error}</p>`;
+            return;
+        }
+
+        prikaz.innerHTML = `
+           <div class="wiki-lokalna-kartica">
+                <h4>Jeste li znali?</h4>
+                <div class="wiki-sadrzaj-kontejner">
+                    <img src="${data.slika}" alt="${data.grad}" class="wiki-kartica-slika">
+                    <div class="wiki-tekst-desno">
+                        <p>${data.tekst}</p>
+                        <a href="${data.link}" target="_blank" class="wiki-saznaj-vise-link">Saznajte više na Wikipediji &rarr;</a>
+                    </div>
+                </div>
+            </div>
+        `;
+    } catch (error) {
+        prikaz.innerHTML = `<p class="wiki-greska-tekst">Neuspješno povezivanje s Python serverom.</p>`;
+        console.error("Wikipedia greška:", error);
+    }
+}
