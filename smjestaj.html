@@ -8,13 +8,11 @@
 </head>
 <body>
 
-    <!-- HERO HEADER KONTEJNER -->
     <header class="hero-header">
         <nav class="container">
             <div class="nav-box">
                 <a href="index.html" class="c-btn">Početna</a>
 
-                <!-- Letovi Dropdown -->
                 <div class="dropdown">
                     <button class="c-btn">Letovi</button>
                     <div class="dropdown-content">
@@ -30,7 +28,6 @@
                     </div>
                 </div>
 
-                <!-- Smještaj Dropdown (Sidrišta na stranici) -->
                 <div class="dropdown">
                     <button class="c-btn">Smještaj</button>
                     <div class="dropdown-content">
@@ -46,7 +43,6 @@
                     </div>
                 </div>
 
-                <!-- Prognoza Dropdown -->
                 <div class="dropdown">
                     <button class="c-btn">Prognoza</button>
                     <div class="dropdown-content">
@@ -62,7 +58,6 @@
                     </div>
                 </div>
 
-                <!-- Autobus Dropdown -->
                 <div class="dropdown">
                     <button class="c-btn">Autobus </button>
                     <div class="dropdown-content">
@@ -88,24 +83,10 @@
     </header>
 
     <main class="main container">
-        
-        <!-- ACTION BOX: Booking.com Integracija -->
-        <div class="lp-container">
-            <div id="booking-search" class="u-card p-30 t-center" style="background: var(--light-blue);">
-                <h2>Traži smještaj na Booking.com</h2>
-                <p>Brza pretraga hotela i apartmana u realnom vremenu preko službenog sučelja.</p>
-                <!-- Ovdje se umeće Booking.com Search Box API -->
-                <div id="booking-api-content" style="background: white; padding: 20px; border-radius: 12px; margin-top: 15px; border: 2px dashed var(--secondary-blue);">
-                    <p><em>[Booking.com Search Widget učitava se ovdje...]</em></p>
-                </div>
-            </div>
-        </div>
-
         <section class="section">
-            <h2 class="t-center m-top-40" style="color: var(--primary-blue);">Istražite destinacije</h2>
-            <p class="t-center">Saznajte više o smještaju i turističkim ponudama u svakom gradu.</p>
+            <h2 class="t-center m-top-40 wiki-naslov-destinacija">Istražite destinacije</h2>
+            <p class="t-center">Saznajte više o smještaju, atrakcijama i turističkim ponudama u svakom gradu.</p>
 
-            <!-- ZAGREB (Slika lijevo - Tekst desno) -->
             <div id="zagreb" class="lp-container">
                 <div class="feature-row">
                     <div class="feature-image-box">
@@ -114,15 +95,16 @@
                     <div class="feature-text">
                         <h2>Zagreb</h2>
                         <p>Istražite hotele u samom srcu metropole ili šarmantne apartmane u Gornjem Gradu. Zagreb nudi bogatu kulturnu ponudu i vrhunski kontinentalni smještaj.</p>
-                        <div class="nav-box" style="justify-content: flex-start; margin-top: 20px;">
-                            <a href="karta.html?grad=zagreb" class="c-btn"> Vidi na karti</a>
+                        <div class="nav-box wiki-gumbovi-kontejner">
+                            <a href="karta.html?grad=zagreb" class="c-btn">Vidi na karti</a>
                             <a href="https://www.tzgz.hr/" target="_blank" class="c-btn">🌐 Turistička info</a>
+                            <button class="c-btn wiki-gumb-atrakcije" onclick="prikaziZanimljivostiGrada('zagreb')">🏛️ Atrakcije</button>
                         </div>
+                        <div id="zagreb-wiki" class="wiki-lokalni-prikaz"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- SPLIT (Tekst lijevo - Slika desno REVERSE) -->
             <div id="split" class="lp-container">
                 <div class="feature-row reverse">
                     <div class="feature-image-box">
@@ -131,15 +113,16 @@
                     <div class="feature-text">
                         <h2>Split</h2>
                         <p>Od luksuznih soba unutar Dioklecijanove palače do modernih resorta uz more. Split je idealna baza za istraživanje srednje Dalmacije.</p>
-                        <div class="nav-box" style="justify-content: flex-start; margin-top: 20px;">
-                            <a href="karta.html?grad=split" class="c-btn"> Vidi na karti</a>
+                        <div class="nav-box wiki-gumbovi-kontejner">
+                            <a href="karta.html?grad=split" class="c-btn">Vidi na karti</a>
                             <a href="https://visitsplit.com/" target="_blank" class="c-btn">🌐 Turistička info</a>
+                            <button class="c-btn wiki-gumb-atrakcije" onclick="prikaziZanimljivostiGrada('split')">🏛️ Atrakcije</button>
                         </div>
+                        <div id="split-wiki" class="wiki-lokalni-prikaz"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- DUBROVNIK (Slika lijevo - Tekst desno) -->
             <div id="dubrovnik" class="lp-container">
                 <div class="feature-row">
                     <div class="feature-image-box">
@@ -148,15 +131,16 @@
                     <div class="feature-text">
                         <h2>Dubrovnik</h2>
                         <p>Doživite elitni turizam u "Biseru Jadrana". Dubrovnik nudi najprestižnije hotele s pet zvjezdica i autohtoni smještaj unutar zidina.</p>
-                        <div class="nav-box" style="justify-content: flex-start; margin-top: 20px;">
-                            <a href="karta.html?grad=dubrovnik" class="c-btn"> Vidi na karti</a>
+                        <div class="nav-box wiki-gumbovi-kontejner">
+                            <a href="karta.html?grad=dubrovnik" class="c-btn">Vidi na karti</a>
                             <a href="https://tzdubrovnik.hr/" target="_blank" class="c-btn">🌐 Turistička info</a>
+                            <button class="c-btn wiki-gumb-atrakcije" onclick="prikaziZanimljivostiGrada('dubrovnik')">🏛️ Atrakcije</button>
                         </div>
+                        <div id="dubrovnik-wiki" class="wiki-lokalni-prikaz"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- ZADAR (Tekst lijevo - Slika desno REVERSE) -->
             <div id="zadar" class="lp-container">
                 <div class="feature-row reverse">
                     <div class="feature-image-box">
@@ -165,15 +149,16 @@
                     <div class="feature-text">
                         <h2>Zadar</h2>
                         <p>Moderni kampovi, boutique hoteli i privatni apartmani s pogledom na najljepši zalazak sunca na svijetu.</p>
-                        <div class="nav-box" style="justify-content: flex-start; margin-top: 20px;">
-                            <a href="karta.html?grad=zadar" class="c-btn"> Vidi na karti</a>
+                        <div class="nav-box wiki-gumbovi-kontejner">
+                            <a href="karta.html?grad=zadar" class="c-btn">Vidi na karti</a>
                             <a href="https://zadar.travel/hr/" target="_blank" class="c-btn">🌐 Turistička info</a>
+                            <button class="c-btn wiki-gumb-atrakcije" onclick="prikaziZanimljivostiGrada('zadar')">🏛️ Atrakcije</button>
                         </div>
+                        <div id="zadar-wiki" class="wiki-lokalni-prikaz"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- PULA (Slika lijevo - Tekst desno) -->
             <div id="pula" class="lp-container">
                 <div class="feature-row">
                     <div class="feature-image-box">
@@ -182,15 +167,16 @@
                     <div class="feature-text">
                         <h2>Pula</h2>
                         <p>Boravite u turističkim resortima Verudele ili apartmanima u blizini Arene. Pula nudi savršen spoj povijesti i odmora na moru.</p>
-                        <div class="nav-box" style="justify-content: flex-start; margin-top: 20px;">
-                            <a href="karta.html?grad=pula" class="c-btn"> Vidi na karti</a>
+                        <div class="nav-box wiki-gumbovi-kontejner">
+                            <a href="karta.html?grad=pula" class="c-btn">Vidi na karti</a>
                             <a href="https://pulainfo.hr/hr/" target="_blank" class="c-btn">🌐 Turistička info</a>
+                            <button class="c-btn wiki-gumb-atrakcije" onclick="prikaziZanimljivostiGrada('pula')">🏛️ Atrakcije</button>
                         </div>
+                        <div id="pula-wiki" class="wiki-lokalni-prikaz"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- RIJEKA (Tekst lijevo - Slika desno REVERSE) -->
             <div id="rijeka" class="lp-container">
                 <div class="feature-row reverse">
                     <div class="feature-image-box">
@@ -199,15 +185,16 @@
                     <div class="feature-text">
                         <h2>Rijeka</h2>
                         <p>Od hostela na brodovima do komfornih hotela na Kvarneru. Rijeka je izvrsna točka za urbana istraživanja i izlete na otoke.</p>
-                        <div class="nav-box" style="justify-content: flex-start; margin-top: 20px;">
-                            <a href="karta.html?grad=rijeka" class="c-btn"> Vidi na karti</a>
+                        <div class="nav-box wiki-gumbovi-kontejner">
+                            <a href="karta.html?grad=rijeka" class="c-btn">Vidi na karti</a>
                             <a href="https://visitrijeka.hr/" target="_blank" class="c-btn">🌐 Turistička info</a>
+                            <button class="c-btn wiki-gumb-atrakcije" onclick="prikaziZanimljivostiGrada('rijeka')">🏛️ Atrakcije</button>
                         </div>
+                        <div id="rijeka-wiki" class="wiki-lokalni-prikaz"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- OSIJEK (Slika lijevo - Tekst desno) -->
             <div id="osijek" class="lp-container">
                 <div class="feature-row">
                     <div class="feature-image-box">
@@ -216,10 +203,12 @@
                     <div class="feature-text">
                         <h2>Osijek</h2>
                         <p>Doživite slavonsko gostoprimstvo u hotelima uz Dravu ili u obiteljskim pansionima unutar Tvrđe.</p>
-                        <div class="nav-box" style="justify-content: flex-start; margin-top: 20px;">
+                        <div class="nav-box wiki-gumbovi-kontejner">
                             <a href="karta.html?grad=osijek" class="c-btn">Vidi na karti</a>
                             <a href="https://www.tzosijek.hr/" target="_blank" class="c-btn">🌐 Turistička info</a>
+                            <button class="c-btn wiki-gumb-atrakcije" onclick="prikaziZanimljivostiGrada('osijek')">🏛️ Atrakcije</button>
                         </div>
+                        <div id="osijek-wiki" class="wiki-lokalni-prikaz"></div>
                     </div>
                 </div>
             </div>
@@ -227,7 +216,6 @@
         </section>
     </main>
 
-    <!-- FOOTER KONTEJNER (Tamno plavi, odvojen) -->
     <footer class="footer-main-container">
         <div class="container t-center">
             <div class="footer-links-grid">
