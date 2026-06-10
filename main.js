@@ -40,12 +40,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     /* ==========================================================================
-       2. LOGIKA ZA REGISTRACIJU (index.html)
+       2. LOGIKA ZA REGISTRACIJU (index.html) - ISPRAVLJENO NA RENDER ADRESU
        ========================================================================== */
     const registrationForm = document.getElementById('registrationForm');
 
     if (registrationForm) {
-        registrationForm.addEventListener('submit', function(e) {
+        registrationForm.addEventListener('submit', async function(e) {
             e.preventDefault();
 
             const password = document.getElementById('password').value;
@@ -67,16 +67,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 lozinka: password
             };
 
-            localStorage.setItem('korisnikIme', korisnik.ime);
+            console.log("Šaljem podatke na Render pozadinu...", korisnik);
 
-            console.log("Podaci spremni za registraciju:", korisnik);
-            alert("Uspješna registracija za: " + korisnik.ime + " " + korisnik.prezime);
-            
-            this.reset();
+            try {
+                // ISPRAVLJENO: Umjesto localhosta sada šalje izravno na Render u oblak
+                const response = await fetch('https://crofly.onrender.com/registracija', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(korisnik)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    localStorage.setItem('korisnikIme', korisnik.ime);
+                    alert(`Uspješna registracija! Dobrodošli, ${korisnik.ime} ${korisnik.prezime}.`);
+                    this.reset();
+                } else {
+                    alert("Greška pri registraciji: " + (data.greska || "Nepoznata pogreška"));
+                }
+
+            } catch (error) {
+                console.error("Komunikacija s backendom nije uspjela:", error);
+                alert("Neuspješno povezivanje s poslužiteljem. Provjerite radi li Render aplikacija!");
+            }
         });
     }
 });
-
+    
 /* ==========================================================================
    3. DODATNE FUNKCIJE (dohvaćanje prognoze)
    ========================================================================== */
@@ -114,7 +134,6 @@ class CroFlyMap {
 
     init() {
         if (document.getElementById("map")) {
-            // Pokrećemo OpenStreetMap unutar 'map' kontejnera preko Leaflet knjižnice
             this.map = L.map('map').setView(this.croatiaCenter, 7);
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -140,7 +159,7 @@ class CroFlyMap {
 
     async filtriraj() {
         const grad = document.getElementById('grad-select').value;
-        const vrsta = document.getElementById('vrsta-smjestaja').value; // Pročitat će "airbnb"
+        const vrsta = document.getElementById('vrsta-smjestaja').value; 
 
         if (!grad) {
             alert("Molimo odaberite grad.");
@@ -150,7 +169,6 @@ class CroFlyMap {
         this.obrisiMarkere();
 
         try {
-            // Šaljemo dohvat (fetch) na tvoju novu objektnu rutu u Flasku
             const response = await fetch(`https://crofly.onrender.com/api/smjestaj/${grad}/${vrsta}`);
             const data = await response.json();
 
@@ -159,14 +177,11 @@ class CroFlyMap {
                 return;
             }
 
-            // Centriramo mapu na koordinate grada koje je vratio Airbnb servis s backenda
             this.map.setView(data.coords, 13);
 
-            // Crtamo markere iz dinamičke liste objekata pristigle s API-ja
             data.objekti.forEach(place => {
                 const marker = L.marker(place.coords).addTo(this.map);
                 
-                // Popup prozorčić koristi ugrađene inline stilove za osnovni tekst, bez diranja styles.css datoteke
                 marker.bindPopup(`
                     <div style="font-family: 'Poppins', sans-serif; min-width: 160px; padding: 5px;">
                         <strong style="color: #003580; font-size: 1.1em; display: block; margin-bottom: 3px;">${place.name}</strong>
@@ -183,7 +198,7 @@ class CroFlyMap {
 
         } catch (error) {
             console.error("Greška pri dohvaćanju Airbnb podataka:", error);
-            alert("Neuspješno povezivanje s poslužiteljem za smještaj.");
+            alert("Neuspješno povezivanje s poslužiteljem for smještaj.");
         }
     }
 
@@ -193,7 +208,6 @@ class CroFlyMap {
     }
 }
 
-// Instanciranje klase i globalno pokretanje
 const croFlyMap = new CroFlyMap();
 
 window.onload = function() {
@@ -299,7 +313,6 @@ document.addEventListener('DOMContentLoaded', () => {
 /* ==========================================================================
    7. LOGIKA ZA WIKIPEDIA ATRAKCIJE (Izravno unutar sekcije grada)
    ========================================================================== */
-
 async function dohvatiWikiPodatke(grad) {
     const response = await fetch(`https://crofly.onrender.com/api/wiki/${grad}`);
     return await response.json();

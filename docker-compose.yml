@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  web_aplikacija:
+    build: . 
+    container_name: moja_flask_stranica
+    ports:
+      - "5000:5000"
+    restart: always

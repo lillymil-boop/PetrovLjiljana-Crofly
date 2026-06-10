@@ -1,0 +1,19 @@
+{
+    "sqltools.connections": [
+        {
+            "mysqlOptions": {
+                "authProtocol": "default",
+                "enableSsl": "Disabled"
+            },
+            "ssh": "Disabled",
+            "previewLimit": 50,
+            "server": "student.veleri.hr",
+            "port": 3306,
+            "driver": "MariaDB",
+            "name": "Veleri",
+            "database": "rda_money",
+            "username": "rda",
+            "password": "11"
+        }
+    ]
+}

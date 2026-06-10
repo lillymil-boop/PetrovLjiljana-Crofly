@@ -1,7 +1,9 @@
-from flask import Flask, jsonify, send_from_directory
+from flask import Flask, jsonify, send_from_directory, request
 from flask_cors import CORS
 import requests
 import os 
+import pymysql
+pymysql.install_as_MySQLdb()
 
 from apiprijevoz import dohvati_javni_prijevoz
 from apivrijeme import dohvati_vrijeme
@@ -11,15 +13,55 @@ from api_airbnb import AirbnbService
 airbnb_service = AirbnbService()
 
 app = Flask(__name__)
-CORS(app)  # Omogućava CORS za sve rute
-
+CORS(app)
 
 API_KEY = os.environ.get('AIRLABS_API_KEY', '62a8d06a-c03e-4228-ba9f-eeb81f44f318')
+
+def db_konekcija():
+    return pymysql.connect(
+        host='student.veleri.hr',
+        port=3306,
+        user='rda',
+        passwd='11',
+        db='rda_money',
+        charset='utf8mb4'
+    )
 
 @app.route('/')
 @app.route('/letovi')
 def index():
     return send_from_directory('.', 'letovi.html')
+
+
+@app.route('/registracija', methods=['POST'])
+def registracija():
+    podaci = request.get_json()
+    if not podaci:
+        return jsonify({"greska": "Nisu poslani podaci"}), 400
+        
+    ime = podaci.get('ime')
+    prezime = podaci.get('prezime')
+    email = podaci.get('email')
+    lozinka = podaci.get('lozinka')
+
+    if not all([ime, prezime, email, lozinka]):
+        return jsonify({"greska": "Sva polja su obavezna"}), 400
+
+    try:
+        db = db_konekcija()
+        cursor = db.cursor()
+        
+        sql = "INSERT INTO letovi_korisnici (ime, prezime, email, lozinka) VALUES (%s, %s, %s, %s)"
+        cursor.execute(sql, (ime, prezime, email, lozinka))
+        db.commit()
+        
+        cursor.close()
+        db.close()
+        return jsonify({"poruka": "Uspješna registracija!"}), 201
+    except pymysql.IntegrityError:
+        return jsonify({"greska": "Korisnik s ovim emailom već postoji"}), 400
+    except Exception as e:
+        return jsonify({"greska": f"Greška na serveru: {str(e)}"}), 500
 
 @app.route('/api/raspored/<grad>')
 def api_raspored(grad):
@@ -63,7 +105,6 @@ def api_prijevoz(grad):
 
 @app.route('/api/prognoza/<grad>')
 def api_prognoza(grad):
-    # Vraća vremenske podatke za traženi grad u JSON obliku
     return jsonify(dohvati_vrijeme(grad))
 
 @app.route('/api/wiki/<grad>', methods=['GET'])
