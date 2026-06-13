@@ -2,17 +2,18 @@ version: '3.8'
 
 services:
   web_aplikacija:
-    build: . 
+    build: .
     container_name: moja_flask_stranica
     ports:
       - "5000:5000"
     restart: always
     volumes:
       - .:/app
-    kontejner-proba:
-      image: lillymil/crofly-online
-      container_name: moja_flask_stranica
-      ports:
-        - "5002:5000"
-      restart: always
+
+  kontejner-proba:
+    image: lillymil/crofly-online
+    container_name: moja_flask_stranica_slika
+    ports:
+      - "5002:5000"
+    restart: always
 
