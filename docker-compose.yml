@@ -9,3 +9,10 @@ services:
     restart: always
     volumes:
       - .:/app
+    kontejner-proba:
+      image: lillymil/crofly-online
+      container_name: moja_flask_stranica
+      ports:
+        - "5000:5000"
+      restart: always
+       
